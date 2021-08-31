@@ -12,22 +12,27 @@ const app = express();
 const PORT = 4000;
 
 app.use(express.json());
+
+massive({
+  connectionString: CONNECTION_STRING,
+  ssl: {
+    rejectUnauthorized: false,
+  }
+}).then((dbInstance) => {
+  app.set('db', dbInstance)
+  console.log('DB Ready')
+});
+
 app.use(session({
   resave: true,
   saveUninitialized: false,
   secret: SESSION_SECRET,
 }));
 
-massive({
-  connectionString: CONNECTION_STRING,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-}).then((dbInstance) => {
-  app.set('db', dbInstance)
-  console.log('DB Ready')
-})
-
 app.post('/auth/register', authCtrl.register);
+
+app.post('/auth/login', authCtrl.login);
+
+app.get('/auth/logout', authCtrl.logout);
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
